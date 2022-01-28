@@ -11,6 +11,8 @@ echo
 
 [ -z "$CONTRACT" ] && echo "Missing \$CONTRACT environment variable" && exit 1
 [ -z "$CONTRACT" ] || echo "Found it! \$CONTRACT is set to [ $CONTRACT ]"
+[ -z "$USER" ] && echo "Missing \$USER environment variable" && exit 1
+[ -z "$USER" ] || echo "Found it! \$USER is set to [ $USER ]"
 
 echo
 echo
@@ -21,25 +23,29 @@ echo "(run this script again to see changes made by this file)"
 echo ---------------------------------------------------------
 echo
 
-near view $CONTRACT helloWorld
+near view $CONTRACT get_owner
 
 echo
 echo
 
-near view $CONTRACT read '{"key":"some-key"}'
+near view $CONTRACT get_accounts
+
+#near view $CONTRACT get_tweets '{"user":"'"$USER"'"}'
+
+near view $CONTRACT get_recent_tweets
+
+#near view $CONTRACT read '{"key":"some-key"}'
 
 echo
+echo 'About to call create_account() on the contract'
+echo near call \$CONTRACT create_account --account_id \$USER
 echo
-echo ---------------------------------------------------------
-echo "Step 2: Call 'change' functions on the contract"
-echo ---------------------------------------------------------
+echo \$CONTRACT is $CONTRACT
+echo \$USER is $USER
 echo
 
-# the following line fails with an error because we can't write to storage without signing the message
-# --> FunctionCallError(HostError(ProhibitedInView { method_name: "storage_write" }))
-# near view $CONTRACT write '{"key": "some-key", "value":"some value"}'
-near call $CONTRACT write '{"key": "some-key", "value":"some value"}' --accountId $CONTRACT
-
+near call $CONTRACT create_account --account_id $USER
 echo
-echo "now run this script again to see changes made by this file"
+near call $CONTRACT create_tweet '{"message":"'"$1"'"}' --account_id $USER 
+echo
 exit 0

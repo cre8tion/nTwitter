@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+[ -z "$CONTRACT" ] && echo "Missing \$CONTRACT environment variable"
+[ -z "$OWNER" ] && echo "Missing \$OWNER environment variable"
+
+echo "deleting $CONTRACT and setting $OWNER as beneficiary"
+echo
+near delete $CONTRACT $OWNER
+
+echo --------------------------------------------
+echo
+echo "cleaning up the /neardev folder"
+echo
+rm -rf ./neardev
+
 # exit on first error after this point to avoid redeploying with successful build
 set -e
 
@@ -9,7 +22,7 @@ echo "Step 1: Build the contract (may take a few seconds)"
 echo ---------------------------------------------------------
 echo
 
-yarn build
+yarn build:release
 
 echo
 echo
@@ -24,7 +37,7 @@ echo
 # near dev-deploy ./build/debug/simple.wasm
 
 # comment the line below to deploy the other example contract
-near dev-deploy ./build/debug/singleton.wasm
+near dev-deploy ./build/release/nTwitter.wasm
 
 echo
 echo
@@ -39,8 +52,8 @@ echo "    see example below (this may not work on Windows)"
 echo
 echo ---------------------------------------------------------
 echo 'export CONTRACT=<dev-123-456>'
-# uncomment this line for a useful hint when using the singleton style
-# echo "near call \$CONTRACT init --accountId \$CONTRACT"
+echo 'export OWNER=<your own account>'
+echo "near call \$CONTRACT init '{\"owner\":\"'\$OWNER'\"}' --accountId \$CONTRACT"
 echo ---------------------------------------------------------
 echo
 
